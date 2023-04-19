@@ -15,7 +15,7 @@ def Extract_PP_from_PDF(input_file, output_file):
 
     output_page = input1.getPage(0)
 
-    x0 = 16.3 * 28.35  # Convert cm to points (1 cm = 28.35 points)
+    x0 = 16.5 * 28.35  # Convert cm to points (1 cm = 28.35 points)
     y0 = (output_page.mediaBox.getHeight() - 1.18 * 28.35)
     x1 = 19.8 * 28.35
     y1 = (output_page.mediaBox.getHeight() - 5.75 * 28.35)
@@ -38,7 +38,7 @@ def Extract_BN_from_PDF(input_file, output_file):
     output_page = input1.getPage(0)
 
     x0 = 10.25 * 28.35  # Convert cm to points (1 cm = 28.35 points)
-    y0 = (output_page.mediaBox.getHeight() - 6.5 * 28.35)
+    y0 = (output_page.mediaBox.getHeight() - 7 * 28.35)
     x1 = 19.75 * 28.35
     y1 = (output_page.mediaBox.getHeight() - 10 * 28.35)
 
@@ -89,16 +89,17 @@ def Read_BN(input_file):
         cv2.drawContours(image, [c], -1, (255,255,255), 9)
 
     text = pytesseract.image_to_string(image, lang="ces")
-    
-    match = re.search(r"rodné číslo \| (.+?)\s", text)
+    print(text)
 
+    match = re.search(r"rodné číslo . (.+?)\s", text)
     if match:
         BN = match.group(1)
         print("BN:", BN)
     else:
-        print("No BN found")
+        print("No BN found in ", input_file)
+        BN = None
 
-    os.remove(image_path)
+    #os.remove(image_path)
     os.remove(output_file)
 
     return BN
@@ -117,8 +118,13 @@ def Save_PP(input_file, BN):
     os.remove(output_file)
 
 
+# Save_PP("/home/winter/Documents/DOC120423-12042023133014-0001.pdf", Read_BN("/home/winter/Documents/DOC120423-12042023133014-0001.pdf"))
+
 for filename in os.listdir(pdf_dir):
     if filename.endswith(".pdf"):
         file = os.path.join(pdf_dir, filename)
         BN = Read_BN(file)
+        if BN is None:
+            continue
         Save_PP(file, BN)
+
